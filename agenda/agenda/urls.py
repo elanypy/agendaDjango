@@ -16,8 +16,13 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from core import views
+from django.views.generic import RedirectView #redireciona automaticamente uma rota vazia
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('helo/', views.hello)
+    path('hello/', views.hello),
+    path('agenda/', views.lista_eventos),
+    path('helloworld/', views.paginaTeste),
+   # path('', views.index)
+    path('', RedirectView.as_view(url='/agenda/'))
 ]
