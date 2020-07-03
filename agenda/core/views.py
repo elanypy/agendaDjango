@@ -3,6 +3,9 @@ from core.models import Evento
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login,logout
 from django.contrib import messages
+from datetime import datetime, timedelta
+from django.http.response import Http404, JsonResponse
+
 
 
 # Create your views here.
@@ -74,21 +77,36 @@ def evento(request):
 def deleteEvento(request, id_evento):
     #validação para que cada usuário poderá deletar apenas seus eventos na agenda.
     usuario = request.user
-    evento = Evento.objects.get(id=id_evento)
+    try:
+            evento = Evento.objects.get(id=id_evento)
+    except Exception:
+        raise Http404()
     if usuario == evento.usuario:
         evento.delete()
+    else:
+        raise Http404()
     return redirect('/')
 
 @login_required(login_url='/login/')  #exige a autenticação do usuário para poder acessar a agenda
 def lista_eventos(request): #utilizando uma page em html para retornar a solicitação do user
     usuario = request.user
-    evento =Evento.objects.filter(usuario=usuario)
+    data_atual = datetime.now() - timedelta(hours=1)
+    evento =Evento.objects.filter(usuario=usuario,
+                                  data_evento__gt= data_atual)   #nesse campo verifica a data o evento cadastrado
+                                                                 #para saber se é maior (__gt) do que a data atual
+                                                                 # para django não há possiblidade de colocar > e sim
+                                                                 #__gt
     dados = {'eventos':evento}
     return render(request, 'agenda.html', dados)
 
 def paginaTeste(request):
     return render(request, 'helloworld.html')
 
+@login_required(login_url='/login/')
+def json_lista_evento(request):
+    usuario = request.user
+    evento = Evento.objects.filter(usuario=usuario).values('id', 'titulo')
+    return JsonResponse(list(evento), safe=False)
 
 
 
