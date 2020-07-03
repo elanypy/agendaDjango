@@ -33,21 +33,51 @@ def submitLogin(request):
 def submitEvento(request):
     if request.POST:
         titulo = request.POST.get('titulo')
+        #local = request.POST.get('local')
         data_evento = request.POST.get('data_evento')
         descricao = request.POST.get('descricao')
         usuario = request.user
+        id_evento = request.POST.get('id_evento')
 
-        Evento.objects.create( titulo = titulo,
-                               data_evento = data_evento,
-                               descricao=descricao,
-                               usuario = usuario)
+        #caso exista um id de evento (em casos de editar)
+        if id_evento:
+            evento = Evento.objects.get(id=id_evento)
+            if evento.usuario == usuario: #validando o usuario para verificar se o usuario que está alterando o evento é realmente dono do evento
+                evento.titulo = titulo
+                evento.descricao = descricao
+                evento.data_evento = data_evento
+                evento.save() #para commitar as alterações
+
+            #segunda forma de atualizar as informações
+            # Evento.objects.filter(id=id_evento).update(titulo = titulo,
+            #                                             data_evento = data_evento,
+            #                                             descricao = descricao)
+        else:
+            Evento.objects.create( titulo=titulo,
+                                  # local=local,
+                                   data_evento=data_evento,
+                                   descricao=descricao,
+                                   usuario=usuario)
 
     return redirect('/')
 
-#adicionar evento
+#adicionar evento / alterar evento
 @login_required(login_url='/login/')
 def evento(request):
-    return render(request, 'evento.html')
+    id_evento = request.GET.get('id')
+    dados = {}
+    if id_evento:
+        dados['evento'] = Evento.objects.get(id=id_evento)
+    return render(request, 'evento.html', dados)
+
+@login_required(login_url='/login/')
+def deleteEvento(request, id_evento):
+    #validação para que cada usuário poderá deletar apenas seus eventos na agenda.
+    usuario = request.user
+    evento = Evento.objects.get(id=id_evento)
+    if usuario == evento.usuario:
+        evento.delete()
+    return redirect('/')
 
 @login_required(login_url='/login/')  #exige a autenticação do usuário para poder acessar a agenda
 def lista_eventos(request): #utilizando uma page em html para retornar a solicitação do user
