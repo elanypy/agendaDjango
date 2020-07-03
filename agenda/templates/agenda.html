@@ -1,6 +1,11 @@
 {% extends "model-page.html" %}
 {% block content %}
     <h2> Agendamentos </h2>
+
+    <a href="evento/">   <!-- Colocando um link no botão --!>
+        <button type="button"> Novo Evento </button>
+    </a>
+
     <ul style="font-size:18px">
     {% for evento in eventos %}  <!-- {% significa comandos do python enquanto que {{ significa que algo vai imprimir --!>
          <li> {{evento.titulo}} - {{ evento.get_data_evento}}</li>
