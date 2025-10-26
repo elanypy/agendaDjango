@@ -31,3 +31,5 @@ urlpatterns = [
     path('login/submit', views.submitLogin),
     path('logout/', views.logoutUser)
 ]
+## isso aqui é um tsste de comentário
+## isso aqui é outro teste de comentário que estou fazendo 26/10/2025
